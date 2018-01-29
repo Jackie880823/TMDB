@@ -8,5 +8,6 @@ import com.jackie.tmdb.R
  * @author  Jackie
  * @version 1.0
  */
-class Constants {
+object Constants {
+    val API_KEY: String = MyApplication.getInstance().getString(R.string.API_KEY_V3)
 }
