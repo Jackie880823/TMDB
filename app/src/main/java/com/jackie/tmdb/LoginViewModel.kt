@@ -42,54 +42,18 @@
 
 package com.jackie.tmdb
 
-import android.arch.lifecycle.ViewModelProviders
-import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.view.inputmethod.EditorInfo
-import android.widget.Toast
-import com.jackie.tmdb.entities.Token
-import io.reactivex.functions.Consumer
-import kotlinx.android.synthetic.main.activity_login.*
+import android.arch.lifecycle.ViewModel
+import com.jackie.tmdb.model.LoginResponse
 
 /**
- * A login screen that offers login via email/password.
+ * Created on 1/31/2018.
+ * @author  Jackie
+ * @version 1.0
  */
-class LoginActivity : AppCompatActivity() {
-    private val tag: String = "LoginActivity"
+class LoginViewModel : ViewModel() {
+    private var loginResponse: LoginResponse = LoginResponse()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-
-        val viewModel: LoginViewModel = ViewModelProviders.of(this).get(LoginViewModel::class.java)
-
-        // Set up the login form.
-        password.setOnEditorActionListener { _, id, _ ->
-            if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                login(viewModel)
-                return@setOnEditorActionListener true
-            }
-            false
-        }
-
-        sign_in_button.setOnClickListener {
-            login(viewModel)
-        }
-    }
-
-    private fun login(viewModel: LoginViewModel) {
-        viewModel.getResponse().login(
-                username.text.toString(),
-                password.text.toString(),
-                Consumer { t: Token ->
-                    Log.d(tag, t.request_token)
-                    finish()
-                },
-                Consumer { error: Throwable ->
-                    Log.e(tag, error.message)
-                    Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
-                }
-        )
+    fun getResponse() : LoginResponse {
+        return loginResponse
     }
 }
