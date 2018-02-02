@@ -40,18 +40,52 @@
  *   limitations under the License.
  */
 
-package com.jackie.tmdb.config
+package com.jackie.tmdb.tools
 
+import android.content.SharedPreferences
+import android.support.annotation.Nullable
 import com.jackie.tmdb.MyApplication
-import com.jackie.tmdb.R
 
 /**
- * Created on 1/24/2018.
+ * Created on 2/2/2018.
  * @author  Jackie
  * @version 1.0
  */
-object Constants {
-    val API_KEY: String = MyApplication.getInstance().getString(R.string.API_KEY_V3)
-    const val TOKEN_SHARED_PREFERENCES_NAME = "com.jackie.tmdb.SharedPreferences"
-    const val KEY_TOKEN = "token"
+class SharedPreferencesUtils {
+    private var preferences: SharedPreferences? = null
+
+    constructor(name: String, mode: Int) {
+        preferences = MyApplication.getInstance().getSharedPreferences(name, mode)
+    }
+
+    fun putValue(key: String, @Nullable value: Any) {
+        val edit = preferences?.edit()
+        when (value) {
+            is String -> edit?.putString(key, value)
+            is MutableSet<*> -> edit?.putStringSet(key, value as MutableSet<String>?)
+            is Int -> edit?.putInt(key, value)
+            is Long -> edit?.putLong(key, value)
+            is Float -> edit?.putFloat(key, value)
+            is Boolean -> edit?.putBoolean(key, value)
+            else -> {
+                return
+            }
+        }
+        edit?.apply()
+    }
+
+    @Nullable
+    fun getValue(key: String, value: Any): Any? {
+        return when (value) {
+            is String -> preferences?.getString(key, value)!!
+            is Set<*> -> preferences?.getStringSet(key, value as MutableSet<String>?)
+            is Int -> preferences?.getInt(key, value)
+            is Long -> preferences?.getLong(key, value)
+            is Float -> preferences?.getFloat(key, value)
+            is Boolean -> preferences?.getBoolean(key, value)
+            else -> {
+                return null
+            }
+        }
+    }
 }

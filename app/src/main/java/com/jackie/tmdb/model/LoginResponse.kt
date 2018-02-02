@@ -42,10 +42,14 @@
 
 package com.jackie.tmdb.model
 
+import android.content.Context
+import android.text.TextUtils
+import com.google.gson.Gson
 import com.jackie.tmdb.config.ApiService
 import com.jackie.tmdb.config.Constants
 import com.jackie.tmdb.config.HttpConfig
 import com.jackie.tmdb.entities.Token
+import com.jackie.tmdb.tools.SharedPreferencesUtils
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
@@ -56,6 +60,24 @@ import io.reactivex.schedulers.Schedulers
  * @version 1.0
  */
 class LoginResponse {
+
+    private fun saveToken(token: Token?) {
+        val gson = Gson()
+        val toKenJson = gson.toJson(token)
+
+        val preferences = SharedPreferencesUtils(Constants.TOKEN_SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+        preferences.putValue(Constants.KEY_TOKEN, toKenJson)
+    }
+
+    private fun getToken(): Token? {
+        val preferences = SharedPreferencesUtils(Constants.TOKEN_SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+        val toKenJson: String = preferences.getValue(Constants.KEY_TOKEN, "") as String
+        return if (TextUtils.isEmpty(toKenJson)) {
+            null
+        } else {
+            Gson().fromJson(toKenJson, Token::class.java)
+        }
+    }
 
     fun login(username: String, password: String, onNext: Consumer<Token>, onError: Consumer<Throwable>) {
         HttpConfig.apiService.getToken(Constants.API_KEY)
@@ -72,7 +94,10 @@ class LoginResponse {
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(
-                                    { t: Token? -> onNext.accept(t) },
+                                    { t: Token? ->
+                                        saveToken(t)
+                                        onNext.accept(t)
+                                    },
                                     { error: Throwable -> onError.accept(error) }
                             )
                 }, { error: Throwable -> onError.accept(error) })
